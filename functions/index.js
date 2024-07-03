@@ -2,7 +2,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { sendFcmMessage } = require('./fcm.js');
-const functions = require('firebase-functions');
 
 const app = express();
 const port = 3000; // Choose your desired port
@@ -67,5 +66,4 @@ function buildCommonMessage() {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
-
-exports.api = functions.https.onRequest(app);
+ 
