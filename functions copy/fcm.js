@@ -7,10 +7,8 @@ const PATH = `/v1/projects/${PROJECT_ID}/messages:send`;
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const SCOPES = [MESSAGING_SCOPE];
 
-// Asynchronous function to send FCM messages
-async function sendFcmMessage(fcmMessage) {
-    try {
-        const accessToken = await getAccessToken();
+function sendFcmMessage(fcmMessage) {
+    getAccessToken().then(function (accessToken) {
         const options = {
             hostname: HOST,
             path: PATH,
@@ -21,37 +19,24 @@ async function sendFcmMessage(fcmMessage) {
             }
         };
 
-        return new Promise((resolve, reject) => {
-            const request = https.request(options, (resp) => {
-                let data = '';
-                resp.setEncoding('utf8');
-                resp.on('data', (chunk) => {
-                    data += chunk;
-                });
-
-                resp.on('end', () => {
-                    console.log('Message sent to Firebase for delivery, response:');
-                    console.log(data);
-                    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-                        resolve(data);
-                    } else {
-                        reject(new Error(`FCM request failed with status ${resp.statusCode}: ${data}`));
-                    }
-                });
+        const request = https.request(options, function (resp) {
+            resp.setEncoding('utf8');
+            resp.on('data', function (data) {
+                console.log('Message sent to Firebase for delivery, response:');
+                console.log(data);
             });
-
-            request.on('error', (err) => {
-                console.error('Unable to send message to Firebase');
-                reject(err);
-            });
-
-            request.write(JSON.stringify(fcmMessage));
-            request.end();
         });
-    } catch (error) {
+
+        request.on('error', function (err) {
+            console.log('Unable to send message to Firebase');
+            console.error(err);
+        });
+
+        request.write(JSON.stringify(fcmMessage));
+        request.end();
+    }).catch(error => {
         console.error('Error getting access token:', error);
-        throw error;
-    }
+    });
 }
 
 // Function to get Google OAuth2 access token

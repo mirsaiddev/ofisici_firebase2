@@ -1,3 +1,4 @@
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const { sendFcmMessage } = require('./fcm.js');
@@ -18,16 +19,12 @@ app.post('/send-fcm-message', async (req, res) => {
         }
 
         const message = buildFcmMessage(to, title, body, data);
-        try {
-            await sendFcmMessage(message);
-            res.status(200).json({ message: 'FCM message sent successfully' });
-        } catch (error) {
-            console.error('Error sending FCM message:', error);
-            res.status(500).json({ error: 'Failed to send FCM message', details: error.message });
-        }
+        sendFcmMessage(message);
+
+        res.status(200).json({ message: 'FCM message sent successfully' });
     } catch (error) {
-        console.error('Unexpected error:', error);
-        res.status(500).json({ error: 'Unexpected error occurred', details: error.message });
+        console.error('Error sending FCM message:', error);
+        res.status(500).json({ error: 'Failed to send FCM message' });
     }
 });
 
@@ -69,3 +66,4 @@ function buildCommonMessage() {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+ 
